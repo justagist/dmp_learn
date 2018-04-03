@@ -23,7 +23,6 @@ def plot_traj(trajectories):
             idx += 1
             plt.plot(trajectory[:,k], color)
     plt.show() 
-    # print trajectories[1]
 
 def plot_path(trajectory, true_points, custom_points):
 
@@ -90,13 +89,21 @@ def test_dmp(dmp, speed=1., plot_trained=False, custom_start = None, custom_goal
 if __name__ == '__main__':
 
     mt = MouseTracker(window_dim = [600, 400])
+
+    # ----- record trajectory using mouse
     trajectory = mt.record_mousehold_path(record_interval = 0.01, close_on_mousebutton_up = True, verbose = False, inverted = True, keep_window_alive = True)
+
+    # ----- custom start and end points for the dmp
     strt_end = mt.get_mouse_click_coords(num_clicks = 2, inverted = True, keep_window_alive = True)
 
     if trajectory.shape[0] > 0:
         dmp = train_dmp(trajectory)
+
+        # ----- the trajectory after modifying the start and goal, speed etc.
         test_traj = test_dmp(dmp, speed=1.,plot_trained=False, custom_start = strt_end[0,:], custom_goal = strt_end[1,:])
 
+        # ----- plotting the 2d paths (actual and modified)
         plot_path(test_traj['pos_traj'], trajectory, custom_points = strt_end)
+
     else:
         print "No data in trajectory!\n"
