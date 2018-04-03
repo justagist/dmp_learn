@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from discrete_dmp import DiscreteDMP
 from config import discrete_dmp_config
-from python_utils.MouseUtils import MouseTracker
+from JustaPython.MouseUtils import MouseTracker
 
 
 def plot_traj(trajectories):
@@ -24,15 +24,21 @@ def plot_traj(trajectories):
             plt.plot(trajectory[:,k], color)
     plt.show() 
 
-def plot_path(trajectory, true_points, custom_points):
+def plot_path(trajectory, true_points, custom_start = None, custom_goal = None):
 
-    plt.plot(trajectory[:,0],trajectory[:,1])
-    plt.scatter(true_points[:,0],true_points[:,1])
+    plt.plot(trajectory[:,0],trajectory[:,1], label = "New path", color = 'b')
+    plt.scatter(true_points[:,0],true_points[:,1], label = "Original Path", color = 'y')
 
-    if custom_points is not None:
-        plt.scatter(custom_points[:,0], custom_points[:,1])
+    if custom_start is not None:
+        plt.scatter(custom_start[0], custom_start[1], label = "Custom start", color = 'r')
+
+    if custom_goal is not None:
+        plt.scatter(custom_goal[0], custom_goal[1], label = "Custom goal", color = 'g')
 
     plt.axes().set_aspect('equal', 'datalim')
+    # handles, labels = plt.get_legend_handles_labels()
+    plt.legend()
+
     plt.show()
 
 
@@ -103,7 +109,7 @@ if __name__ == '__main__':
         test_traj = test_dmp(dmp, speed=1.,plot_trained=False, custom_start = strt_end[0,:], custom_goal = strt_end[1,:])
 
         # ----- plotting the 2d paths (actual and modified)
-        plot_path(test_traj['pos_traj'], trajectory, custom_points = strt_end)
+        plot_path(test_traj['pos_traj'], trajectory, custom_start = strt_end[0,:], custom_goal = strt_end[1,:])
 
     else:
         print "No data in trajectory!\n"
