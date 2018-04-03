@@ -25,10 +25,15 @@ def plot_traj(trajectories):
     plt.show() 
     # print trajectories[1]
 
-def plot_path(trajectory, true_points):
+def plot_path(trajectory, true_points, custom_points):
 
     plt.plot(trajectory[:,0],trajectory[:,1])
     plt.scatter(true_points[:,0],true_points[:,1])
+
+    if custom_points is not None:
+        plt.scatter(custom_points[:,0], custom_points[:,1])
+
+    plt.axes().set_aspect('equal', 'datalim')
     plt.show()
 
 
@@ -40,23 +45,30 @@ def train_dmp(trajectory):
 
     return dmp
 
-def test_dmp(dmp, speed=1., plot_trained=False):
+def test_dmp(dmp, speed=1., plot_trained=False, custom_start = None, custom_goal = None):
     test_config = discrete_dmp_config
     test_config['dt'] = 0.001
 
     # play with the parameters
-    start_offset = np.zeros(discrete_dmp_config['dof'])
-    goal_offset = np.zeros(discrete_dmp_config['dof'])
+    if custom_start is None:
+        new_start = dmp._traj_data[0, 1:] + np.zeros(discrete_dmp_config['dof'])
+    else:
+        new_start = custom_start
+
+    if custom_goal is None:
+        new_goal = dmp._traj_data[0, 1:] + np.zeros(discrete_dmp_config['dof'])
+    else:
+        new_goal = custom_goal
+
     external_force = np.zeros(discrete_dmp_config['dof'])
     alpha_phaseStop = 50.
 
-    test_config['y0'] = dmp._traj_data[0, 1:] + start_offset
+    test_config['y0'] = new_start
     test_config['dy'] = np.zeros(discrete_dmp_config['dof'])
-    test_config['goals'] = dmp._traj_data[-1, 1:] + goal_offset
+    test_config['goals'] = new_goal
     test_config['tau'] = 1./speed
     test_config['ac'] = alpha_phaseStop
     test_config['type'] = 1
-    test_config['dof'] = 2
 
     if test_config['type'] == 3:
         test_config['extForce'] = external_force
@@ -77,10 +89,14 @@ def test_dmp(dmp, speed=1., plot_trained=False):
 
 if __name__ == '__main__':
 
-    trajectory = MouseTracker().record_mousehold_path(record_interval = 0.01, close_on_mousebutton_up = True, verbose = False, inverted = True)
+    mt = MouseTracker(window_dim = [600, 400])
+    trajectory = mt.record_mousehold_path(record_interval = 0.01, close_on_mousebutton_up = True, verbose = False, inverted = True, keep_window_alive = True)
+    strt_end = mt.get_mouse_click_coords(num_clicks = 2, inverted = True, keep_window_alive = True)
 
-    dmp = train_dmp(trajectory)
-    test_traj = test_dmp(dmp, speed=2.,plot_trained=False)
+    if trajectory.shape[0] > 0:
+        dmp = train_dmp(trajectory)
+        test_traj = test_dmp(dmp, speed=1.,plot_trained=False, custom_start = strt_end[0,:], custom_goal = strt_end[1,:])
 
-    plot_path(test_traj['pos_traj'], trajectory)
-
+        plot_path(test_traj['pos_traj'], trajectory, custom_points = strt_end)
+    else:
+        print "No data in trajectory!\n"

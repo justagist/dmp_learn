@@ -300,11 +300,11 @@ class DiscreteDMP():
         ddtraj = np.hstack([np.asarray(timestamps)[:,None], ddY])
 
         traj_data = {
-        # ----- computed traj of the trajectory
+        # -----computed traj of the trajectory
         'pos':traj,
-        # ----- computed vel of the trajectory
+        # -----computed vel of the trajectory
         'vel':dtraj,
-        # ----- computed acc of the trajectory
+        # -----computed acc of the trajectory
         'acc':ddtraj,
         }
 
