@@ -100,7 +100,7 @@ if __name__ == '__main__':
     trajectory = mt.record_mousehold_path(record_interval = 0.01, close_on_mousebutton_up = True, verbose = False, inverted = True, keep_window_alive = True)
 
     # ----- custom start and end points for the dmp
-    strt_end = mt.get_mouse_click_coords(num_clicks = 2, inverted = True, keep_window_alive = True)
+    strt_end = mt.get_mouse_click_coords(num_clicks = 2, inverted = True, keep_window_alive = True, verbose = False)
 
     if trajectory.shape[0] > 0:
         dmp = train_dmp(trajectory)
