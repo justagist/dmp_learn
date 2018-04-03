@@ -61,21 +61,21 @@ def test_dmp(dmp, speed=1., plot_trained=False, custom_start = None, custom_goal
         new_start = custom_start
 
     if custom_goal is None:
-        new_goal = dmp._traj_data[0, 1:] + np.zeros(discrete_dmp_config['dof'])
+        new_goal = dmp._traj_data[-1, 1:] + np.zeros(discrete_dmp_config['dof'])
     else:
         new_goal = custom_goal
 
     external_force = np.zeros(discrete_dmp_config['dof'])
-    alpha_phaseStop = 50.
+    alpha_phaseStop = 50
 
     test_config['y0'] = new_start
     test_config['dy'] = np.zeros(discrete_dmp_config['dof'])
     test_config['goals'] = new_goal
     test_config['tau'] = 1./speed
     test_config['ac'] = alpha_phaseStop
-    test_config['type'] = 1
+    test_config['type'] = 3
 
-    if test_config['type'] == 3:
+    if test_config['type'] == 1:
         test_config['extForce'] = external_force
     else:
         test_config['extForce'] = np.zeros(discrete_dmp_config['dof'])
@@ -97,12 +97,14 @@ if __name__ == '__main__':
     mt = MouseTracker(window_dim = [600, 400])
 
     # ----- record trajectory using mouse
+    print "Draw trajectory ... "
     trajectory = mt.record_mousehold_path(record_interval = 0.01, close_on_mousebutton_up = True, verbose = False, inverted = True, keep_window_alive = True)
 
     # ----- custom start and end points for the dmp
+    print "Click custom start and end points"
     strt_end = mt.get_mouse_click_coords(num_clicks = 2, inverted = True, keep_window_alive = True, verbose = False)
 
-    if trajectory.shape[0] > 0:
+    if trajectory is not None:
         dmp = train_dmp(trajectory)
 
         # ----- the trajectory after modifying the start and goal, speed etc.
