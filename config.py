@@ -7,7 +7,7 @@ discrete_dmp_config = {
         'K':D**2./4., 
         'rbf_num':500, # number of basis function per DMP
         'tau':1.0,
-        'ax':-3,
+        'ax':-3, # time constant of canonical system e+(ax)t
         'dt':0.001, # how fast the trajectory rolls out
         'original_scaling':1.,
         'type':1,
