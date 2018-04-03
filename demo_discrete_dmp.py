@@ -22,6 +22,13 @@ def plot_traj(trajectories):
             idx += 1
             plt.plot(trajectory[:,k], color)
     plt.show() 
+    # print trajectories[1]
+
+def plot_path(trajectory, true_points):
+
+    plt.plot(trajectory[:,0],trajectory[:,1])
+    plt.scatter(true_points[:,0],true_points[:,1])
+    plt.show()
 
 
 def train_dmp(trajectory):
@@ -71,6 +78,8 @@ if __name__ == '__main__':
 
     trajectory = np.array([[1,2],[1,3],[2,3],[2,4],[3,4],[3,5]])
     dmp = train_dmp(trajectory)
-    test_traj = test_dmp(dmp, speed=2.,plot_trained=True)
+    test_traj = test_dmp(dmp, speed=2.,plot_trained=False)
+
+    plot_path(test_traj['pos_traj'], trajectory)
 
 
