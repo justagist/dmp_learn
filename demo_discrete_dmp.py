@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from discrete_dmp import DiscreteDMP
 from config import discrete_dmp_config
+from python_utils.MouseUtils import MouseTracker
 
 
 def plot_traj(trajectories):
@@ -76,10 +77,10 @@ def test_dmp(dmp, speed=1., plot_trained=False):
 
 if __name__ == '__main__':
 
-    trajectory = np.array([[1,2],[1,3],[2,3],[2,4],[3,4],[3,5]])
+    trajectory = MouseTracker().record_mousehold_path(record_interval = 0.01, close_on_mousebutton_up = True, verbose = False, inverted = True)
+
     dmp = train_dmp(trajectory)
     test_traj = test_dmp(dmp, speed=2.,plot_trained=False)
 
     plot_path(test_traj['pos_traj'], trajectory)
-
 
