@@ -26,7 +26,12 @@ def plot_traj(trajectories):
 
 def plot_path(trajectory, true_points, custom_start = None, custom_goal = None):
 
-    plt.plot(trajectory[:,0],trajectory[:,1], label = "New path", color = 'b')
+    # ----- interactive mode on
+    plt.ion()
+
+    # ----- position trajectory for plotting
+    pos_trajectory = trajectory['pos_traj']
+
     plt.scatter(true_points[:,0],true_points[:,1], label = "Original Path", color = 'y')
 
     if custom_start is not None:
@@ -36,10 +41,30 @@ def plot_path(trajectory, true_points, custom_start = None, custom_goal = None):
         plt.scatter(custom_goal[0], custom_goal[1], label = "Custom goal", color = 'g')
 
     plt.axes().set_aspect('equal', 'datalim')
-    # handles, labels = plt.get_legend_handles_labels()
-    plt.legend()
+    
+    i = 0
 
-    plt.show()
+    # ----- find the resultant velocity for updating the graph at the scaled speed
+    vel_square = np.square(trajectory['vel_traj'])
+    resultant_vel = np.sqrt(vel_square[:,0]+vel_square[:,1])*1000
+
+    skip_step = int(0.01*pos_trajectory.shape[0]) # ----- steps to skip so that plot update is not too slow
+
+    while i < (pos_trajectory.shape[0]):
+        try:
+            plt.plot(pos_trajectory[:i,0],pos_trajectory[:i,1], label = "New path", color = 'b')
+
+            pause = 0.001/resultant_vel[i] if resultant_vel[i] > 0.01 else 0.001/0.01
+            plt.pause(pause)
+            plt.draw()
+
+            if i < 1:
+                plt.legend()
+
+            i += skip_step
+
+        except KeyboardInterrupt:
+            break
 
 
 def train_dmp(trajectory):
@@ -73,7 +98,7 @@ def test_dmp(dmp, speed=1., plot_trained=False, custom_start = None, custom_goal
     test_config['goals'] = new_goal
     test_config['tau'] = 1./speed
     test_config['ac'] = alpha_phaseStop
-    test_config['type'] = 3
+    test_config['type'] = 1
 
     if test_config['type'] == 1:
         test_config['extForce'] = external_force
@@ -97,21 +122,21 @@ if __name__ == '__main__':
     mt = MouseTracker(window_dim = [600, 400])
 
     # ----- record trajectory using mouse
-    print "Draw trajectory ... "
+    print "\nDraw trajectory ... "
     trajectory = mt.record_mousehold_path(record_interval = 0.01, close_on_mousebutton_up = True, verbose = False, inverted = True, keep_window_alive = True)
 
-    # ----- custom start and end points for the dmp
-    print "Click custom start and end points"
+    # ----- get custom start and end points for the dmp using mouse clicks
+    print "\nClick custom start and end points"
     strt_end = mt.get_mouse_click_coords(num_clicks = 2, inverted = True, keep_window_alive = True, verbose = False)
 
     if trajectory is not None:
         dmp = train_dmp(trajectory)
 
         # ----- the trajectory after modifying the start and goal, speed etc.
-        test_traj = test_dmp(dmp, speed=1.,plot_trained=False, custom_start = strt_end[0,:], custom_goal = strt_end[1,:])
+        test_traj = test_dmp(dmp, speed=1.,plot_trained=False, custom_start = strt_end[0,:] if strt_end is not None else None, custom_goal = strt_end[1,:] if strt_end is not None else None)
 
         # ----- plotting the 2d paths (actual and modified)
-        plot_path(test_traj['pos_traj'], trajectory, custom_start = strt_end[0,:], custom_goal = strt_end[1,:])
+        plot_path(test_traj, trajectory, custom_start = strt_end[0,:] if strt_end is not None else None, custom_goal = strt_end[1,:] if strt_end is not None else None)
 
     else:
         print "No data in trajectory!\n"
